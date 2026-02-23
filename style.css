@@ -1,0 +1,2342 @@
+/* --- GLOBÁLIS MOBILOS JAVÍTÁS --- */
+* {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none; /* Opcionális: letiltja a hosszú nyomásra felugró menüt képeken */
+    outline: none; /* Eltünteti a fókuszkeretet is kattintáskor */
+}
+
+:root {
+    /* Alapszínek */
+    --theme-pink: #FF69B4;
+    --theme-light-pink: #FFB6C1;
+    --glass-color: #FFFFFF;
+    
+    /* Fal (Kristály) színei */
+    --wall-gradient-start: #FF9A9E;
+    --wall-gradient-end: #FECFEF;
+    --wall-border: #FF69B499;
+
+    /* Átlátszósági szintek (HEX8 utolsó 2 karaktere) */
+    --alpha-grid-border: 66;    /* 40% */
+    --alpha-square-bg: 26;      /* 15% */
+    --alpha-glass-1: 4D;         /* 30% */
+    --alpha-glass-2: 80;         /* 50% */
+    --alpha-glass-shadow: 66;     /* 40% */
+}
+
+/* --- ALAP BEÁLLÍTÁSOK MOBILRA --- */
+body {
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100dvh; /* dvh: dinamikus magasság, figyelembe veszi a mobilos címsorokat */
+    width: 100vw;
+    background-color: #ffe6e6; 
+    margin: 0;
+    overflow: hidden; /* Nincs görgetősáv */
+    overscroll-behavior: none; /* Megakadályozza a lefelé húzós frissítést mobilon */
+    touch-action: none; /* Teljesen letiltja a böngészős gesztusokat */
+}
+
+/* --- KÉPERNYŐK ÉS GOMBOK TÍPUSAI, RÉTEGEK --- */
+
+.hidden {
+    display: none !important;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7); /* Sötétített háttér */
+    z-index: 15000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.invisible-btn {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: opacity 0.3s ease;
+}
+
+#effects-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Átlátszó a kattintásoknak */
+    z-index: 10000;      /* Minden felett legyen */
+    overflow: visible;   /* Hogy az óriás bomba kilógzhasson */
+}
+
+/* Ha a játéktéren rajta van ez az osztály, minden mozgás megáll */
+.game-paused,
+.game-paused * {
+    animation-play-state: paused !important;
+    transition: none !important; /* Opcionális: a csúszásokat is megállítja */
+}
+
+
+/* --- KÖZÖS HÁTTÉR A START ÉS LOADING SCREENNEK --- */
+#loading-screen, #start-screen {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100dvh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 3000; /* Minden más felett legyen */
+}
+
+/* --- START SCREEN DIZÁJN --- */
+.start-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6vh;
+    animation: fadeIn 1s ease-out;
+}
+
+.main-title {
+    font-size: min(12vw, 4rem);
+    color: #ff4757;
+    text-align: center;
+    line-height: 1.2;
+    text-shadow: 3px 3px 0px white, 0 10px 20px rgba(255, 71, 87, 0.3);
+    margin: 0;
+    font-weight: 900;
+}
+
+.start-btn {
+    width: 220px;
+    height: 80px;
+    font-size: 2.2rem;
+    border-radius: 40px;
+    animation: pulseMild 2s infinite ease-in-out;
+}
+
+/* --- ÚJ: BRAND SPLASH STÍLUSOK (Első indítás) --- */
+#loader-brand-content {
+    animation: fadeIn 0.5s ease-out;
+    gap: 30px;
+    justify-content: center;
+}
+
+.brand-title {
+    font-size: min(15vw, 4.5rem);
+    color: #ff4757;
+    text-shadow: 3px 3px 0px white, 0 10px 20px rgba(255, 71, 87, 0.3);
+    margin: 0;
+    font-weight: 900;
+    line-height: 1.1;
+    text-align: center;
+}
+
+.brand-heart {
+    font-size: 6rem;
+    margin: 20px 0;
+    animation: heartbeat 1.2s infinite;
+    filter: drop-shadow(0 10px 15px rgba(255, 71, 87, 0.4));
+}
+
+@keyframes heartbeat {
+    0% { transform: scale(1); }
+    14% { transform: scale(1.3); }
+    28% { transform: scale(1); }
+    42% { transform: scale(1.3); }
+    70% { transform: scale(1); }
+}
+
+/* --- LOADING SCREEN DIZÁJN --- */
+.loader-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 85vw;
+    max-width: 350px;
+    text-align: center;
+}
+
+.tip-container {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 30px 20px;
+    border-radius: 30px;
+    box-shadow: 0 15px 35px rgba(255, 71, 87, 0.15);
+    margin-bottom: 40px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.tip-icon {
+    font-size: 4.5rem;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
+}
+
+.tip-container h2 {
+    margin: 0 0 10px 0;
+    color: #2f3542;
+    font-size: 1.8rem;
+    font-weight: 900;
+}
+
+.tip-container p {
+    margin: 0;
+    color: #57606f;
+    font-size: 1.1rem;
+    line-height: 1.5;
+}
+
+/* Töltőcsík */
+.loading-bar-container {
+    width: 100%;
+    height: 18px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 15px;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.loading-bar-fill {
+    height: 100%;
+    width: 0%; /* Ezt animálja a JS */
+    background: linear-gradient(90deg, #ff4757, #ff6b81);
+    border-radius: 10px;
+    /* A transition sebességét a JS fogja felülírni */
+}
+
+.loading-text {
+    font-size: 1.1rem;
+    color: #ff4757;
+    font-weight: 900;
+    margin: 0;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* --- PRE-LEVEL SPLASH STÍLUSOK (Kompakt verzió) --- */
+#loader-splash-content {
+    animation: fadeIn 0.3s ease-out;
+    width: 90vw; /* Ne engedjük kifolyni a képernyő szélére */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.splash-level-title {
+    font-size: min(10vw, 3rem); /* Dinamikusan zsugorodik kis telefonon */
+    color: #ff4757;
+    text-shadow: 2px 2px 0px white;
+    margin-bottom: 20px; /* Kisebb távolság */
+    font-weight: 900;
+    text-align: center;
+}
+
+.splash-goals-container {
+    display: flex;
+    flex-wrap: wrap; /* Több sorba tördeli, ha sok a cél */
+    justify-content: center;
+    gap: 10px; /* Kisebb rés a kártyák között */
+    margin-bottom: 25px;
+    width: 100%;
+}
+
+.splash-goal-item {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 10px 15px; /* Jóval kisebb belső margók */
+    border-radius: 15px;
+    box-shadow: 0 8px 15px rgba(255, 71, 87, 0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 60px; /* Keskenyebb dobozok */
+    
+    opacity: 0;
+    transform: translateY(20px);
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.splash-goal-emoji {
+    font-size: 2.2rem; /* Lényegesen kisebb emoji */
+    margin-bottom: 5px;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+}
+
+.splash-goal-amount {
+    font-size: 1.2rem; /* Kisebb szám */
+    font-weight: 900;
+    color: #2f3542;
+}
+
+.splash-moves-container {
+    background: linear-gradient(135deg, #ff4757, #ff6b81);
+    color: white;
+    padding: 10px 25px; /* Kisebb, elegánsabb pirula */
+    border-radius: 25px;
+    font-size: 1.6rem; /* Kisebb betű */
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 15px rgba(255, 71, 87, 0.3);
+    
+    opacity: 0;
+    transform: translateY(20px);
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    animation-delay: 0.2s; /* Kicsit gyorsabb belépés */
+}
+
+.splash-moves-icon { 
+    font-size: 2rem; 
+}
+
+.splash-loading-text {
+    margin-top: 30px;
+    font-size: 1rem;
+    color: #ff4757;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    animation: pulseMild 1.5s infinite;
+}
+
+@keyframes popIn {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Képernyő elhalványulás (fade out) átmenete */
+.screen.fade-out {
+    opacity: 0;
+    transition: opacity 0.4s ease-out;
+}
+
+
+/* --- A JÁTÉK FŐ KONTÉNERE --- */
+.game-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Fentről induljon a tartalom */
+    align-items: center;
+    width: 100%;
+    height: 100dvh; /* Kitölti a teljes képernyőt */
+    padding: 10px; /* Egy kis szegély a telefon szélétől */
+    box-sizing: border-box;
+}
+
+.score-board h3 {
+    color: #d63031;
+}
+
+/* --- A JÁTÉKMEZŐ (GRID) --- */
+.grid {
+    margin-top: 0 auto;
+    width: 95vw;
+    max-width: 480px;
+    aspect-ratio: 1 / 1;
+    background-color: #ffcccc;
+    border: 4px solid var(--theme-pink);
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(255, 105, 180, 0.3);
+    position: relative; /* Ez kell, hogy a rétegek benne maradjanak */
+    overflow: hidden;
+    z-index: 5;
+    flex-shrink: 0;
+}
+
+#glass-grid-container, 
+#candy-grid-container {
+    position: absolute; /* Egymás felett vannak */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: grid; /* Itt van a rács! */
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+}
+
+#glass-grid-container {
+    z-index: 6; /* A háttérkép felett (ami 0) */
+    pointer-events: none; /* Az üvegen "átnyúlunk" */
+}
+
+#candy-grid-container {
+    z-index: 10; /* Az üveg felett */
+}
+
+/* Az üvegpadló darabkái */
+.glass-tile {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    transition: all 0.3s ease; /* Szép átmenet törésnél */
+}
+
+/* Az üvegpadló darabkái */
+.glass-tile {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    /* Ide nem kell z-index, a container intézi */
+}
+
+/* A cukorkák helye (ezt kérdezted) */
+.candy-square {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: min(8vw, 40px);
+    cursor: grab;
+    position: relative;
+    border: none;
+    /* A z-index: 1 helyett a szülő container (z-index: 10) védi */
+}
+
+/* Amikor éppen húzod */
+.active-candy {
+    z-index: 100 !important;
+    border-color: #d63031;
+    cursor: grabbing;
+}
+
+.snap-back {
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+.wrong-swap {
+    animation: shake 0.4s ease-in-out;
+    background-color: rgba(214, 48, 49, 0.2);
+}
+
+@keyframes shake {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-8px, 0); }
+    50% { transform: translate(8px, 0); }
+    75% { transform: translate(-4px, 0); }
+}
+
+
+#grid-bg-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    filter: blur(15px);
+    z-index: 0;
+    transition: filter 1.5s ease-in-out;
+}
+
+#grid-bg-layer.clear-bg {
+    filter: blur(0px);
+}
+
+/* --- A cukorka tartalma (ezt fogjuk mozgatni a cella helyett) --- */
+.candy-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none; /* Hogy a húzás érzékelése a szülő cellán maradjon */
+}
+
+/* --- SIKER ANIMÁCIÓ --- */
+#success-overlay {
+    background-color: rgba(0, 0, 0, 0.75);
+    z-index: 1500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.success-text {
+    color: white;
+    font-size: 4.5rem;
+    text-shadow: 0 0 20px var(--theme-pink), 3px 3px 0px #d63031;
+    font-family: 'Georgia', serif;
+    transform: scale(0);
+    opacity: 0;
+    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.6s ease-out;
+}
+
+/* Ezt az osztályt a JS adja hozzá a beúszáshoz */
+.success-text.show-anim {
+    transform: scale(1);
+    opacity: 1;
+}
+
+/* --- ÁTPÖRGETŐ RÉTEG --- */
+#skip-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100dvh;
+    z-index: 1400; /* A játéktér felett, de az ablakok alatt */
+    cursor: pointer;
+}
+
+/* --- JÁTÉKSÁV (Szélesség = Pálya szélessége) --- */
+.game-dashboard {
+    margin-top: 5px; /* Levegő a pálya és a sáv között */
+    width: 95vw; /* Pontosan megegyezik a grid szélességével */
+    max-width: 480px; /* Pontosan megegyezik a grid maximumával */
+    background-color: rgba(255, 255, 255, 0.95); 
+    padding: 10px;
+    border-radius: 20px;
+    border: 3px solid var(--theme-light-pink);
+    box-shadow: 0 8px 25px rgba(255, 105, 180, 0.2);
+    
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+/* --- LÉPÉSEK RÉSZE --- */
+.moves-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 50px; /* Kisebb lett */
+    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+}
+
+.moves-icon {
+    font-size: 1.3rem; /* Kisebb ikon */
+    color: #d63031;
+    margin-bottom: 2px;
+}
+
+.moves-value {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #d63031;
+    line-height: 1;
+}
+
+/* --- JOBB FELSŐ KILÉPÉS GOMB --- */
+.game-top-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%; /* Kerek gomb */
+    border: 3px solid var(--theme-pink);
+    background: white;
+    color: var(--theme-pink);
+    font-size: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+    flex-shrink: 0; /* Ne nyomódjon össze */
+}
+
+.game-top-btn:active {
+    transform: scale(0.9);
+}
+
+
+
+/* --- CÉLOK TARTÓJA (Mostantól 2 oszlopos rács) --- */
+#goal-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 15px;
+    width: 100%;
+    align-items: center;
+}
+
+.goal-bar-wrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+}
+
+/* Az emoji az előtérben */
+.goal-emoji {
+    font-size: 1.6rem;
+    z-index: 2;
+    position: relative;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+/* A sáv háttér, ami az emoji mögül indul */
+.goal-progress-bg {
+    flex: 1;
+    height: 18px; /* Megemelt magasság az olvashatóságért */
+    background: #ffe6e6;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid var(--theme-light-pink);
+    margin-left: -20px; 
+    z-index: 1;
+}
+
+.goal-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff9a9e, #fecfef);
+    width: 0%; 
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.goal-progress-text {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.4rem;
+    font-weight: 900;
+    color: #d63031;
+    text-shadow: 1px 1px 0px white;
+    padding-left: 5.5px;
+}
+
+/* --- KÉSZ ÁLLAPOT STÍLUSA --- */
+.goal-completed .goal-progress-fill {
+    background: linear-gradient(90deg, #2ecc71, #27ae60) !important;
+}
+
+.goal-completed .goal-progress-bg {
+    border-color: #27ae60;
+}
+
+.goal-completed .goal-progress-text {
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+
+/* Felső sáv elrendezése */
+#game-top-bar {
+    width: 95vw;
+    max-width: 480px;
+    margin: 0px 0px 10px 0px;
+    display: flex;
+    align-items: center; /* A gombot és a szöveges blokkot középre hozza egymáshoz képest */
+    gap: 2px;
+    padding: 2px 5px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 40px;
+    box-sizing: border-box;
+}
+
+/* A gomboknak visszaadjuk a kattintást */
+#game-top-bar button {
+    pointer-events: auto;
+}
+
+.score-star-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column; /* Egymás alá teszi a szöveget és a sávot */
+    justify-content: center;
+    gap: 4px; /* Kis távolság a pontszám és a sáv között */
+}
+
+/* A pontszám sáv háttere */
+.score-progress-bg {
+    width: 100%;
+    height: 18px; /* Picit vastagabb, hogy a belső sáv is jól mutasson */
+    background: rgba(0, 0, 0, 0.3); /* Kicsit sötétebb cső a kontraszt miatt */
+    border-radius: 12px;
+    position: relative;
+    border: 2px solid white;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+    padding: 1px; /* ÚJ: Ez tartja bent a sárga csíkot! */
+    box-sizing: border-box; 
+    overflow: hidden; /* Ha a sárga csík túllógna, levágja */
+}
+
+/* A kitöltés (sárga/arany) */
+.score-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #ffd700, #ffae00);
+    border-radius: 8px; /* Kisebb lekerekítés a belső sávnak */
+    transition: width 0.5s ease-out;
+}
+
+/* Csillagok a sávon */
+.star-marker {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 12px;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.star-marker.active {
+    color: #ffd700;
+    font-size: 18px;
+    text-shadow: 0 0 4px rgba(0,0,0,0.5);
+}
+
+.score-text {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--theme-pink);
+    text-shadow: 1px 1px 0px white;
+    text-align: left; /* A gomb felőli oldalra zárjuk */
+    line-height: 1;
+    margin-left: 2px;
+}
+
+/* Szivárványos Party Mode a bónusz fázis alatt */
+.score-progress-fill.bonus-rainbow {
+    background: linear-gradient(
+        90deg, 
+        #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000
+    );
+    background-size: 200% 100%; /* Hosszabb átmenet, hogy tudjon mozogni */
+    animation: rainbowMove 2s linear infinite; /* Mozgatás */
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+@keyframes rainbowMove {
+    0% { background-position: 100% 0; }
+    100% { background-position: 0 0; }
+}
+
+/* Egy kis extra pulzálás a keretnek is */
+.score-progress-bg.bonus-glow {
+    animation: borderGlow 1s alternate infinite;
+}
+
+@keyframes borderGlow {
+    0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); border-color: white; }
+    100% { box-shadow: 0 0 15px rgba(255, 215, 0, 1); border-color: #ffd700; }
+}
+
+/* A lépésszámlálóból kirepülő fénygömb */
+.move-to-rocket-flyer {
+    pointer-events: none;
+    font-size: 1.8rem;
+    z-index: 10000;
+    text-shadow: 0 0 15px #ffd700, 0 0 30px #ffae00;
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+    /* A transition felel a sima repülésért */
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+}
+
+/* Lebegő pontszám animáció */
+.floating-score {
+    position: fixed;
+    pointer-events: none;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: white;
+    text-shadow: 0 0 5px rgba(0,0,0,0.5), 0 0 10px var(--theme-pink);
+    z-index: 1000;
+    animation: floatUpAndFade 0.8s ease-out forwards;
+}
+
+@keyframes floatUpAndFade {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-50px) scale(1.2); opacity: 0; }
+}
+
+/* Pontszámláló lüktetése */
+.score-punch {
+    animation: scorePunchAnim 0.2s ease-out;
+}
+
+@keyframes scorePunchAnim {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); color: #FFD700; } /* Arany villanás */
+    100% { transform: scale(1); }
+}
+
+
+
+/* --- ESZKÖZTÁR (BOOSTER BAR) --- */
+.booster-bar {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 95vw;
+    max-width: 480px;
+    margin: 5px 0 0px 0; /* Távolság a grid és a dashboard között */
+    padding: 5px 10px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 25px;
+    box-sizing: border-box;
+}
+
+.booster-item {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    background: white;
+    border: 2px solid var(--theme-light-pink);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.booster-item:active {
+    transform: scale(0.9);
+}
+
+/* Ha egy booster ki van választva (aktív célzás) */
+.booster-item.active {
+    border-color: #ff1493;
+    background: #fff0f5;
+    transform: scale(1.15);
+    box-shadow: 0 0 15px rgba(255, 20, 147, 0.5);
+}
+
+/* Darabszám jelző kis kör */
+.booster-count {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    background: #d63031;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 900;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Ha 0 van belőle, legyen szürke vagy más stílusú a gomb? */
+.booster-item.empty {
+    filter: grayscale(0.5);
+    opacity: 0.8;
+}
+
+.booster-icon {
+    font-size: 1.5rem;
+    user-select: none;
+}
+
+
+/* --- WIN SCREEN --- */
+
+#win-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100dvh;
+    background-color: rgba(0, 0, 0, 0.65); /* Sötétebb háttér */
+    backdrop-filter: blur(8px); /* Modern üveg-effektus */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.win-modal {
+    background: linear-gradient(135deg, #ffffff, #fff5f7);
+    width: 75vw; 
+    max-width: 280px; 
+    
+    /* FÜGGŐLEGES KORLÁTOZÁS */
+    max-height: 80dvh; /* Maximum a képernyő 80%-át foglalhatja el */
+    padding: 20px 15px;
+    
+    border-radius: 35px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3), inset 0 2px 0 rgba(255, 255, 255, 0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* Tartalom függőlegesen középre */
+    gap: 1.5vh; /* Kisebb távolság az elemek között */
+    
+    box-sizing: border-box;
+    animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modalPop {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+#win-message {
+    font-size: 1.8rem; 
+    color: #ff4757;
+    margin: 0 0 10px 0;
+    font-weight: 900;
+    text-align: center;
+}
+
+.win-score-text {
+    font-size: 1.8rem;
+    color: #2f3542;
+    font-weight: 900;
+    margin-top: 8px;
+    font-family: 'Courier New', Courier, monospace; /* Tiszta számok */
+}
+
+/* A megnyert kép tárolója - Galéria stílus */
+.win-image-container {
+    width: 100px; /* Jóval kisebb és aranyosabb */
+    height: 100px;
+    border-radius: 20px; /* Nem éles négyzet, lágyított */
+    border: 4px solid white;
+    box-shadow: 0 8px 20px rgba(255, 71, 87, 0.2);
+    margin-bottom: 5px;
+    overflow: hidden;
+    flex-shrink: 0; 
+}
+
+.win-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+}
+
+/* --- GYŐZELMI KÉPERNYŐ GOMBJAI (LETISZTULT) --- */
+.win-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+/* Egyforma méretű, négyzetes gombok */
+.win-action-btn {
+    width: 55px;  /* Kisebb méret! */
+    height: 55px; /* Kisebb méret! */
+    font-size: 1.8rem;
+    border-radius: 16px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    box-shadow: 0 5px 0 rgba(0,0,0,0.15);
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.win-action-btn:active {
+    transform: translateY(5px);
+    box-shadow: 0 0 0 rgba(0,0,0,0.15);
+}
+
+/* A zöld Következő gomb */
+.primary-btn {
+    background-color: #2ecc71;
+    box-shadow: 0 5px 0 #27ae60;
+    width: 100px; /* A tovább gomb pirula alakú maradhat, de kisebb */
+}
+.primary-btn:active { box-shadow: 0 0 0 #27ae60; }
+
+/* A kisebb Újra és Menü gombok */
+.secondary-btn {
+    background-color: #ff4757;
+    box-shadow: 0 5px 0 #ff1e34;
+}
+.secondary-btn:active { box-shadow: 0 0 0 #ff1e34; }
+
+/* Finomabb lüktetés */
+@keyframes pulseMild {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); } /* Csak 8%-ot nő, nem 20-at */
+    100% { transform: scale(1); }
+}
+
+/* --- Win Screen csillagai --- */
+.win-stats-container {
+    background: #f1f2f6;
+    border-radius: 25px;
+    padding: 5px 5px;
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.06);
+    width: 90%;
+}
+
+.win-stars {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.win-star {
+    font-size: 3.5rem;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s;
+    /* Alapból "kikapcsolva": szürke és kicsit áttetsző */
+    filter: grayscale(100%) brightness(70%) opacity(50%);
+    transform: scale(1);
+}
+
+/* A dupla rétegű csillag trükkje */
+.win-star-wrapper {
+    position: relative;
+    display: inline-block;
+    font-size: 2.5rem; /* Kicsit visszafogottabb emoji méret */
+}
+
+.win-star-bg {
+    display: block;
+    filter: grayscale(100%) brightness(85%) opacity(40%);
+}
+
+.win-star-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0%; 
+    overflow: hidden;
+    display: block;
+    white-space: nowrap;
+    /* EZ KISIMÍTJA AZ ANIMÁCIÓT! */
+    transition: width 0.1s linear; 
+}
+
+.win-star-wrapper.pop {
+    animation: starPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes starPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.4); filter: drop-shadow(0 0 10px #ffd700); }
+    100% { transform: scale(1); }
+}
+
+/* A meg nem szerzett csillagok is jelenjenek meg, csak szürkén */
+.win-star.show-empty {
+    transform: scale(1);
+}
+
+
+/* --- POWERUPS --- */
+
+
+.pop-animation {
+    animation: matchPop 0.3s ease-out forwards;
+    background-color: rgba(255, 192, 203, 0.6);
+    border-radius: 50%;
+    z-index: 10;
+}
+
+@keyframes matchPop {
+    0% { transform: scale(1); opacity: 1; }
+    40% { transform: scale(1.2); opacity: 0.9; }
+    100% { transform: scale(0.2); opacity: 0; }
+}
+
+.power-bg-h, .power-bg-v, .power-bg-bomb, .power-bg-colorbomb {
+    width: 100%;
+    height: 100%;
+    background: none !important; /* Nincs többé színes doboz */
+    box-shadow: none !important;
+    border-radius: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative; /* Fontos a pseudo-elemekhez */
+}
+
+/* Minden ikonnak inline-blocknak kell lennie, hogy a pseudo-elemek működjenek rajta! */
+.rocket-icon-h, .rocket-icon-v, .bomb-icon, .colorbomb-icon {
+    display: inline-block;
+    position: relative; 
+    z-index: 2;
+}
+
+.rocket-icon-h, .rocket-icon-v {
+    position: relative;
+    z-index: 2;
+}
+
+.rocket-icon-h { transform: rotate(45deg); animation: engineShakeH 0.8s infinite linear; }
+.rocket-icon-v { transform: rotate(-45deg); animation: engineShakeV 0.8s infinite linear; }
+
+@keyframes engineShakeH {
+    0% { transform: rotate(45deg) translate(0, 0); }
+    25% { transform: rotate(45deg) translate(-1px, 1px); }
+    75% { transform: rotate(45deg) translate(1px, -1px); }
+    100% { transform: rotate(45deg) translate(0, 0); }
+}
+
+@keyframes engineShakeV {
+    0% { transform: rotate(-45deg) translate(0, 0); }
+    25% { transform: rotate(-45deg) translate(-1px, 1px); }
+    75% { transform: rotate(-45deg) translate(1px, -1px); }
+    100% { transform: rotate(-45deg) translate(0, 0); }
+}
+
+.bomb-icon {
+    display: inline-block;
+    animation: pulseBomb 0.8s infinite alternate ease-in-out;
+}
+
+@keyframes pulseBomb {
+    0% { transform: scale(0.9); }
+    100% { transform: scale(1.1); }
+}
+
+.colorbomb-icon {
+    position: relative;
+    z-index: 2;
+    /* Alap rózsaszín/gyémánt ragyogás */
+    filter: drop-shadow(0 0 10px rgba(255, 105, 180, 0.8));
+    animation: heartbeatSlow 3s infinite ease-in-out;
+}
+
+@keyframes heartbeatSlow {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); filter: drop-shadow(0 0 5px rgba(255, 105, 180, 0.5)); }
+}
+
+/* A kis csillanás (pseudo-elem) */
+.colorbomb-icon::after {
+    content: '';
+    position: absolute;
+    /* Pozicionáljuk a szív jobb felső csücskére */
+    top: 40%;
+    right: 30%;
+    /* Nagyon pici méret */
+    width: 4px;
+    height: 4px;
+    background: white;
+    /* Elforgatjuk és adunk neki ragyogást, hogy csillagnak tűnjön */
+    transform: rotate(45deg);
+    box-shadow: 0 0 4px 2px rgba(255, 255, 255, 0.9);
+    border-radius: 50%; /* Enyhén kerekített sarkok a természetesebb fényért */
+    
+    opacity: 0;
+    pointer-events: none;
+    /* Ritkán villan egyet */
+    animation: tinySparkle 4s infinite ease-in-out;
+}
+
+/* Az animáció: semmiből előtűnik, picit megnő, majd eltűnik */
+@keyframes tinySparkle {
+    0%, 85%, 100% { 
+        opacity: 0; 
+        transform: scale(0) rotate(45deg); 
+    }
+    92% { 
+        opacity: 1; 
+        transform: scale(1.5) rotate(45deg); /* Picit felvillan */
+    }
+}
+
+
+.powerup-trigger {
+    animation: triggerFlash 0.25s ease-out;
+    z-index: 100;
+}
+
+@keyframes triggerFlash {
+    0% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.3); filter: brightness(2); }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+
+/* --- ÚJ POWERUP ANIMÁCIÓK --- */
+
+/* 1. Bomba dagadás (Sima bomba) */
+.single-bomb-ghost {
+    position: fixed;
+    z-index: 10000;
+    pointer-events: none;
+    font-size: 2.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: none !important;
+    border: none !important;
+    animation: singleEmojiAnim 0.8s ease-in-out forwards; /* Lassítva: 0.4s -> 0.8s */
+}
+
+@keyframes singleEmojiAnim {
+    0% { transform: translate(-50%, -50%) scale(1); filter: brightness(1); }
+    70% { transform: translate(-50%, -50%) scale(2.2); filter: brightness(1.5) drop-shadow(0 0 10px red); }
+    100% { transform: translate(-50%, -50%) scale(2.8); filter: brightness(10); opacity: 0; }
+}
+
+/* 2. Colorbomb Izzás (Amíg lő) */
+.colorbomb-active {
+    animation: colorbombZap 0.15s infinite alternate !important;
+    z-index: 160;
+}
+@keyframes colorbombZap {
+    0% { transform: scale(1) rotate(-5deg); filter: brightness(1.2) drop-shadow(0 0 10px white); }
+    100% { transform: scale(1.2) rotate(5deg); filter: brightness(2) drop-shadow(0 0 20px yellow); }
+}
+
+/* 3. Kilőtt Villám/Fénycsóva (Javított forgatással) */
+.lightning-beam {
+    position: fixed;
+    background: linear-gradient(90deg, transparent, #fff, #ffd700, transparent);
+    height: 6px;
+    border-radius: 3px;
+    box-shadow: 0 0 15px #ffd700, 0 0 5px #fff;
+    transform-origin: left center;
+    z-index: 9999;
+    pointer-events: none;
+    /* Alapértelmezett szög beállítása a változóból */
+    transform: rotate(var(--angle, 0deg)); 
+    animation: zapFade 0.25s ease-out forwards;
+}
+
+/* Az animáció most már forgat ÉS nyújt egyszerre */
+@keyframes zapFade {
+    0% { opacity: 0; transform: rotate(var(--angle, 0deg)) scaleX(0); }
+    30% { opacity: 1; transform: rotate(var(--angle, 0deg)) scaleX(1); }
+    100% { opacity: 0; transform: rotate(var(--angle, 0deg)) scaleX(1); filter: brightness(3); }
+}
+
+/* 4. Dupla Colorbomb Képernyőrengés és Lökéshullám */
+.screen-shake {
+    animation: shakeScreenAnim 0.4s ease-in-out infinite;
+}
+@keyframes shakeScreenAnim {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-4px, 4px); }
+    50% { transform: translate(4px, -3px); }
+    75% { transform: translate(-4px, -4px); }
+}
+
+.shockwave {
+    position: fixed; /* Ez is kikerül a rácsból */
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,215,0,0.6) 40%, transparent 70%);
+    z-index: 9998;
+    pointer-events: none;
+    animation: shockwaveExpand 1s ease-out forwards;
+}
+
+@keyframes shockwaveExpand {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(30); opacity: 0; }
+}
+
+/* 5. Óriás Bomba Emoji Animáció (Csak az emoji!) */
+.giant-bomb-ghost {
+    position: fixed;
+    z-index: 10000;
+    pointer-events: none;
+    width: 60px;  /* Fix szélesség a pontosabb központosításhoz */
+    height: 60px; /* Fix magasság */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.8rem; /* Kicsit kisebb alapméret */
+    background: none !important;
+    border: none !important;
+    transform-style: preserve-3d;
+    /* A translate(-50%, -50%) garantálja, hogy a közepe legyen a megadott X, Y ponton */
+    transform: translate(-50%, -50%);
+    animation: giant3DAnim 1.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes giant3DAnim {
+    /* 0-45%: Növekedés és pördülés (2.8x-as méretig, ami kb. az 5x5-ös terület széle) */
+    0% { transform: translate(-50%, -50%) scale(1) rotateY(0deg); filter: brightness(1); }
+    45% { transform: translate(-50%, -50%) scale(2.8) rotateY(360deg); filter: brightness(1.2); opacity: 1; }
+    /* 45-85%: Hatásszünet és izzás */
+    85% { transform: translate(-50%, -50%) scale(2.8) rotateY(360deg); filter: brightness(2) drop-shadow(0 0 25px red); opacity: 1; }
+    /* 100%: Végső pukkanás, nem nő tovább drasztikusan */
+    100% { transform: translate(-50%, -50%) scale(3.2) rotateY(360deg); filter: brightness(10); opacity: 0; }
+}
+
+/* --- ÚJ BOOSTER EFFEKTEK --- */
+
+/* --- KALAPÁCS ÜTÉS EFFEKT --- */
+.hammer-swing-effect {
+    position: absolute;
+    font-size: 4rem; /* Jó nagy kalapács */
+    pointer-events: none;
+    z-index: 10002;
+    /* A forgáspont a nyél alja legyen */
+    transform-origin: bottom center;
+    animation: hammerStrikeAnim 0.4s ease-in forwards;
+    filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.3));
+}
+
+@keyframes hammerStrikeAnim {
+    0% { 
+        transform: translate(-50%, -120%) rotate(-45deg); 
+        opacity: 0; 
+    }
+    20% { opacity: 1; }
+    /* A becsapódás pontja */
+    70% { 
+        transform: translate(-50%, -40%) rotate(10deg) scale(1.1); 
+    }
+    /* Kis visszarúgás */
+    100% { 
+        transform: translate(-50%, -50%) rotate(0deg) scale(1); 
+        opacity: 0; 
+    }
+}
+
+/* Kisebb becsapódás a kalapácsnak */
+.small-impact {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, #fff 20%, #ffe6e6 50%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    pointer-events: none;
+    z-index: 10001;
+    animation: impactFlash 0.3s ease-out forwards; /* Gyorsabb pukkanás */
+}
+
+
+/* --- MODERN OSZLOP TÖRLÉS EFFEKT (TÜZES NYALÁB) --- */
+.energy-beam-col {
+    position: absolute;
+    top: 0;
+    width: 50px;
+    height: 0;
+    overflow: visible;
+    /* Ragyogó vörös-narancs-fehér gradiens törzs */
+    background: linear-gradient(to bottom, transparent, #ff4500 20%, #fff0f5 50%, #ff4500 80%, transparent 100%);
+    /* Intenzív külső pink/vörös és belső fehér ragyogás */
+    box-shadow: 0 0 25px #ff1493, inset 0 0 15px #fff;
+    pointer-events: none;
+    z-index: 10001;
+    opacity: 0.95;
+    transition: height 0.4s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+    mix-blend-mode: screen; /* Ragyogóbb hatás a háttéren */
+}
+
+/* A nyaláb elején lévő "becsapódási fej" */
+.energy-beam-col::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 180%;
+    height: 60px;
+    /* Ovális, vakító vöröses fény */
+    background: radial-gradient(ellipse at center, #fff 0%, #ff69b4 40%, transparent 80%);
+    filter: blur(8px);
+    opacity: 0.9;
+}
+
+/* A becsapódás hullám (a meteor végén) */
+.impact-wave {
+    position: absolute;
+    width: 120px; /* Kicsit nagyobb robbanás */
+    height: 120px;
+    /* Tüzes gyűrű */
+    background: radial-gradient(circle, #fff 0%, #ff4500 30%, #ff1493 60%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    pointer-events: none;
+    z-index: 10002;
+    animation: impactFlash 0.5s ease-out forwards;
+}
+
+@keyframes impactFlash {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+}
+
+.wind-tornado {
+    position: absolute;
+    font-size: 2.5rem; /* Tornádó vagy felhő */
+    pointer-events: none;
+    z-index: 10001;
+    transition: left 0.6s linear; /* Egyenletes söprés */
+    filter: drop-shadow(10px 0 15px rgba(255, 255, 255, 0.9));
+}
+
+/* --- LÉPÉSSZÁMLÁLÓ LEZÁRVA (FREE SWAP) --- */
+.moves-box.locked-status {
+    transform: scale(1.1); /* Kicsit kiemeljük */
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    z-index: 10;
+}
+
+/* A kis arany lakat a doboz sarkán */
+.moves-box::after {
+    content: '🔒';
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    font-size: 1.2rem;
+    background: white;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    border: 2px solid #ffd700;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    
+    /* Alaphelyzetben láthatatlan és pici */
+    opacity: 0;
+    transform: scale(0) rotate(-45deg);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: none;
+}
+
+.moves-box.locked-status::after {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+}
+
+/* EXTRA: Amikor "kinyílik" (ezt JS-ből adjuk hozzá egy pillanatra) */
+.moves-box.unlocking::after {
+    content: '🔓'; /* Nyitott lakat */
+    opacity: 0;
+    /* Lassabb (0.7s) és látványosabb ívű mozgás */
+    transform: translateY(-40px) scale(1.8) rotate(15deg);
+    transition: all 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+    filter: drop-shadow(0 0 15px #ffd700); /* Arany ragyogás a kinyíláskor */
+}
+
+/* --- SHUFFLE: FEKETE LYUK EFFEKT --- */
+@keyframes shakeCandy {
+    0% { transform: translate(0px, 0px) rotate(0deg); }
+    25% { transform: translate(-1px, 0px) rotate(-1deg); }
+    50% { transform: translate(0px, -1px) rotate(0deg); }
+    75% { transform: translate(1px, 0px) rotate(1deg); }
+    100% { transform: translate(0px, 0px) rotate(0deg); }
+}
+
+.shaking-candy {
+    animation: shakeCandy 0.5s ease-in-out infinite;
+}
+
+/* --- SHUFFLE: MÁGIKUS PORTÁL EFFEKT (Rózsaszínes) --- */
+.vortex-center {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    /* Rózsaszínes, cukorkás árnyalatok */
+    background: radial-gradient(circle, #ffffff 10%, #ff69b4 30%, #ff1493 60%, transparent 70%);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    /* Pink ragyogás */
+    box-shadow: 0 0 30px #ff69b4, 0 0 60px #ff1493;
+    z-index: 0;
+    pointer-events: none;
+    animation: magicPortalSequence 3s ease-in-out forwards;
+    mix-blend-mode: screen;
+}
+
+/* Az animáció marad, ahogy legutóbb is volt */
+@keyframes magicPortalSequence {
+    0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
+    20% { transform: translate(-50%, -50%) scale(3.5) rotate(180deg); opacity: 1; }
+    80% { transform: translate(-50%, -50%) scale(3.5) rotate(720deg); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(0) rotate(900deg); opacity: 0; }
+}
+
+/* --- MOBILOS GÖRGETHETŐ FŐMENÜ (CAROUSEL) --- */
+
+.screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly; /* Egyenletesen elosztja a helyet, megszünteti a kilógást */
+    height: 100dvh; /* Szigorúan a képernyő magassága, nincs túllógás */
+    width: 100vw;
+    padding: 15px; 
+    box-sizing: border-box;
+    overflow: hidden; /* Letiltjuk a képernyő szintű görgetést */
+}
+
+.menu-header-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px; /* Távolság a top-bar és a cím között */
+    padding-top: 10px;
+}
+
+.menu-top-bar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-sizing: border-box;
+    /* Kivettük a position: absolute-ot, hogy ne lógjon rá semmire! */
+}
+
+.menu-title {
+    color: #d63031;
+    font-size: min(2.5rem, 8vw); /* Dinamikus méret: pici telefonon automatikusan összébb megy */
+    text-align: center;
+    margin: 0; /* Levettük a fix margót, a space-evenly rendezi */
+    text-shadow: 2px 2px 0px white;
+    flex-shrink: 0; /* Megtiltjuk, hogy összenyomódjon */
+}
+
+.stat-box {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 5px 12px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    font-weight: 900;
+    font-size: 1.2rem;
+    color: #555;
+}
+
+.stat-icon {
+    font-size: 1.4rem;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
+}
+
+#menu-hearts-timer {
+    font-size: 0.8rem;
+    color: #d63031;
+    margin-left: 5px;
+    font-family: monospace; /* Hogy ne ugráljanak a számok */
+}
+
+.level-buttons {
+    display: flex;
+    align-items: center;
+    width: 100vw;
+    height: 120px; 
+    margin-bottom: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none; /* Firefox */
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    flex-shrink: 0;
+}
+
+/* Láthatatlan távtartók az elejére és végére */
+.level-buttons::before,
+.level-buttons::after {
+    content: '';
+    flex: 0 0 calc(50vw - 50px); 
+    height: 80px;
+}
+
+.level-buttons::-webkit-scrollbar {
+    display: none;
+}
+
+.level-btn {
+    flex: 0 0 80px; 
+    height: 80px;
+    margin: 0 10px; 
+    border-radius: 10%; /* Mobilon sokkal jobban néznek ki a kerek gombok! */
+    font-size: 2rem;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    scroll-snap-align: center;
+    border: none;
+    transition: transform 0.3s, box-shadow 0.3s;
+    flex-direction: column; /* Egymás alá kerüljön a szám és a csillagok */
+    gap: 2px;
+}
+
+.level-number {
+    font-size: 1.8rem;
+    line-height: 1;
+}
+
+/* CSILLAGOK A GOMBON */
+.btn-stars {
+    display: flex;
+    gap: 2px;
+    margin-top: -5px; /* Kicsit feljebb húzzuk */
+}
+
+.btn-stars span {
+    font-size: 0.8rem;
+    color: rgba(0,0,0,0.2); /* Üres csillag színe */
+}
+
+.btn-stars span.star-filled {
+    color: #ffd700; /* Teli csillag arany */
+    text-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
+
+
+/* 1. Állapot: Befejezett pálya */
+.level-completed {
+    background: linear-gradient(135deg, #ff9a9e, #fecfef);
+    color: #d63031;
+    box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+    border: 3px solid white;
+}
+
+/* 2. Állapot: Jelenlegi (Villog, egy picit nagyobb) */
+.level-current {
+    background: linear-gradient(45deg, #ff69b4, #ff1493);
+    color: white;
+    box-shadow: 0 5px 20px rgba(255, 20, 147, 0.6);
+    border: 3px solid white;
+    animation: pulse-btn 1.5s infinite;
+    transform: scale(1.1);
+}
+
+@keyframes pulse-btn {
+    0% { transform: scale(1.1); }
+    50% { transform: scale(1.18); }
+    100% { transform: scale(1.1); }
+}
+
+/* 3. Állapot: Zárt */
+.level-locked {
+    background: #e0e0e0;
+    color: #999;
+    box-shadow: inset 0 3px 6px rgba(0,0,0,0.1);
+    cursor: not-allowed;
+    scroll-snap-align: none; /* ÚJ: Emiatt nem tapad meg a zárt pályákon */
+}
+
+/* ARANYKERET (3 csillag esetén) */
+.level-gold {
+    background: linear-gradient(135deg, #ffd700, #ffae00);
+    color: white;
+    border: 3px solid #fff;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+    animation: shine 3s infinite; /* Opcionális csillogás */
+}
+
+@keyframes shine {
+    0% { filter: brightness(1); }
+    50% { filter: brightness(1.2); }
+    100% { filter: brightness(1); }
+}
+
+
+/* --- PÁLYA INFORMÁCIÓS PANEL --- */
+#level-info-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 350px;
+    /* Fix magasság, hogy ne ugráljon a tartalom változásakor */
+    min-height: 120px; 
+}
+
+#info-level-title {
+    display: none; /* Eltüntetjük, mert felesleges helyet foglal */
+}
+
+/* REKORD CÍMKE */
+
+.highscore-badge-container {
+    height: 35px; /* Fix helyet foglal a badge-nek */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.highscore-badge {
+    background: linear-gradient(90deg, #f1c40f, #f39c12);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 1.1rem;
+    font-weight: 900;
+    box-shadow: 0 4px 10px rgba(243, 156, 18, 0.3);
+    border: 2px solid white;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: 100%; /* Hogy kitöltse a sort, vagy legyen külön sorban */
+    justify-content: center;
+}
+
+.goal-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    min-height: 50px; /* Fix hely a céloknak, akkor is ha üres */
+    align-content: flex-start;
+}
+/* A célok (emojik + számok) apró lebegő kapszulák lesznek */
+.goal-preview > div, 
+.goal-preview > span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #d63031;
+    box-shadow: 0 4px 10px rgba(255, 105, 180, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+/* --- ALSÓ NAVIGÁCIÓS SÁV --- */
+.bottom-nav-bar {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    box-sizing: border-box;
+    gap: 15px;
+    margin-top: auto; /* Lenyomja a képernyő aljára */
+    margin-bottom: 20px;
+}
+
+/* Oldalsó gombok (Shop, Galéria) */
+.nav-btn {
+    flex: 1; /* Egyforma szélesek lesznek */
+    padding: 12px 0;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 15px;
+    border: none;
+    cursor: pointer;
+    background: white;
+    color: #ff1493;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+/* Középső Play Gomb */
+.play-btn {
+    flex: 1.5; /* Szélesebb, mint az oldalsók */
+    height: 60px;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: white;
+    font-size: 1.4rem;
+    font-weight: 900;
+    border: none;
+    box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+    cursor: pointer;
+    animation: pulse-play 2s infinite ease-in-out;
+    transition: all 0.3s ease;
+}
+
+@keyframes pulse-play {
+    0% { transform: scale(1); box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4); }
+    50% { transform: scale(1.05); box-shadow: 0 8px 25px rgba(46, 204, 113, 0.6); }
+    100% { transform: scale(1); box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4); }
+}
+
+/* --- LETILTOTT ÁLLAPOT (Play gomb, ha nincs élet) --- */
+.disabled-btn {
+    background: #bdc3c7 !important; /* Szürke szín */
+    color: #7f8c8d !important;
+    box-shadow: none !important;
+    animation: none !important; /* Nincs pulzálás */
+    cursor: not-allowed !important;
+    transform: none !important;
+}
+
+/* Kiemelt (kiválasztott) állapot a karusszelben */
+.level-selected {
+    border-color: #ff1493 !important;
+    transform: scale(1.15) !important;
+    box-shadow: 0 8px 25px rgba(255, 20, 147, 0.8) !important;
+    z-index: 10;
+}
+
+
+/* --- GALÉRIA NÉZET --- */
+#gallery-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100dvh;
+    width: 100vw;
+    padding-top: 25px;
+    position: relative; /* A gomb sarokba rögzítéséhez kell */
+    box-sizing: border-box;
+}
+
+#gallery-screen h1 {
+    color: #d63031;
+    font-size: 1.8rem;
+    text-align: center;
+    margin: 0 0 15px 0;
+    text-shadow: 2px 2px 0px white;
+    flex-shrink: 0; /* Ne nyomódjon össze */
+}
+
+/* --- KICSI VISSZA GOMB A JOBB FELSŐ SAROKBAN --- */
+#btn-back-from-gallery {
+    position: absolute;
+    top: 25px;
+    right: 20px;
+    width: 45px;
+    height: 35px;
+    background: linear-gradient(45deg, #ff69b4, #ff1493);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(255, 105, 180, 0.3);
+    transition: transform 0.2s;
+    z-index: 50; /* Mindig felül marad */
+}
+
+#btn-back-from-gallery:active {
+    transform: scale(0.95);
+}
+
+/* --- GÖRGETHETŐ GALÉRIA RÁCS --- */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    width: 100%;
+    max-width: 450px;
+    
+    flex: 1; /* Kitölti a maradék helyet */
+    overflow-y: auto; /* Engedélyezi a függőleges görgetést */
+    padding: 10px; /* Hely az árnyékoknak és a nagyításnak */
+    margin-bottom: 20px;
+    align-content: flex-start; /* Fentről lefelé töltse fel a helyet */
+    scrollbar-width: none;
+}
+.gallery-grid::-webkit-scrollbar {
+    display: none;
+}
+
+/* --- A SZÉP KERETES KÉPEK --- */
+.gallery-item {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 8px; /* Picit szögletesebb, fotószerűbb */
+    border: 6px solid white; /* Vastag belső fehér keret */
+    outline: 2px solid var(--theme-light-pink); /* Színes külső szegély */
+    box-shadow: 0 6px 15px rgba(255, 105, 180, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.gallery-item:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 5px rgba(255, 105, 180, 0.4);
+}
+
+/* --- GALÉRIA ARANYKERET --- */
+.gallery-gold-frame {
+    border-color: #ffd700 !important; /* Arany belső keret */
+    outline: 4px solid #fff !important; /* Fehér külső */
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.8), inset 0 0 20px rgba(255, 215, 0, 0.5) !important;
+    position: relative;
+    animation: goldPulse 3s infinite;
+}
+
+@keyframes goldPulse {
+    0% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.8); }
+    50% { box-shadow: 0 0 25px rgba(255, 215, 0, 1); }
+    100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.8); }
+}
+
+
+
+/* --- SHOP OVERLAY --- */
+.shop-overlay {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    z-index: 100; /* Minden felett legyen */
+}
+
+/* A teljes bolt konténer */
+.shop-container {
+    background: white;
+    width: 90%;
+    max-width: 350px;
+    max-height: 85vh; /* ÚJ: A képernyő magasságának maximum 85%-a lehet */
+    border-radius: 30px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column; /* Egymás alá rakja a fejlécet, füleket és a tartalmat */
+    box-sizing: border-box;
+}
+
+.shop-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+.shop-header h2 {
+    margin: 0;
+    color: var(--theme-pink);
+    font-size: 1.8rem;
+}
+
+.shop-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    border-bottom: 2px solid rgba(0,0,0,0.1);
+    padding-bottom: 5px;
+}
+
+.shop-tab {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: none;
+    font-weight: bold;
+    color: #888;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.shop-tab.active {
+    color: #ff69b4;
+    border-bottom: 3px solid #ff69b4;
+}
+
+/* A görgethető rész (ahol a termékek vannak) */
+.shop-content-group {
+    flex: 1; /* ÚJ: Kitölti a maradék helyet a konténerben */
+    overflow-y: auto; /* BEKAPCSOLJA A GÖRDÍTÉST */
+    padding-right: 8px;
+    margin-top: 10px;
+    
+    /* Mobilos görgetés simítása */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Egy kis csinosítás a görgetősávnak */
+.shop-content-group::-webkit-scrollbar { width: 5px; }
+.shop-content-group::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #888;
+    cursor: pointer;
+}
+
+/* Egyenleg */
+.shop-balance-display {
+    text-align: center;
+    background: #fff8e1; /* Halvány sárga */
+    color: #f39c12;
+    padding: 8px;
+    border-radius: 10px;
+    font-weight: bold;
+    border: 1px solid #ffe082;
+}
+
+/* Termékek rácsa */
+.shop-items-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Egy termék kártya */
+.shop-item {
+    display: flex;
+    align-items: center;
+    background: #f9f9f9;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 15px;
+    gap: 10px;
+}
+
+.shop-item:hover {
+    transform: scale(1.02);
+}
+
+.item-icon {
+    font-size: 1.8rem;
+    flex-shrink: 0;
+}
+
+.item-details {
+    flex: 1;
+    text-align: left;
+}
+
+.item-details h3 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.item-details p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+/* Vásárlás gomb */
+.buy-btn {
+    background: var(--theme-pink);
+    color: white;
+    border: none;
+    padding: 8px 5px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    min-width: 70px;
+}
+
+.buy-btn:active {
+    transform: scale(0.95);
+}
+
+/* Prémium termék (Arany keret) */
+.premium-item {
+    border: 2px solid #ffd700;
+    background: linear-gradient(to right, #fff, #fffbf0);
+}
+
+.gold-btn {
+    background: linear-gradient(135deg, #f1c40f, #d35400);
+}
+
+/* Ha nincs elég pénz (JS kapcsolja majd be) */
+.buy-btn.disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    box-shadow: none;
+    opacity: 0.7;
+}
+
+
+/* --- ÜVEGHATÁS (Glassmorphism) --- */
+.glass-1 {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    /* Homályosítja az alatta lévő hátteret, mint az üveg */
+    backdrop-filter: blur(4px) brightness(1.1);
+    -webkit-backdrop-filter: blur(4px) brightness(1.1); /* Safari támogatás */
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-2 {
+    background-color: rgba(255, 255, 255, 0.4) !important;
+    backdrop-filter: blur(8px) brightness(1.2);
+    -webkit-backdrop-filter: blur(8px) brightness(1.2);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.9), 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* --- FAL (Kristálytömb és Törés) --- */
+.candy-square.wall {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    
+    /* CSÖKKENTETT TÁVOLSÁG: 4px-ről 1.5px-re vettem, így közelebb érnek egymáshoz */
+    border: 1.5px solid transparent; 
+    background-clip: padding-box;
+    
+    /* TÖMÖR KRISTÁLY KINÉZET: Erősebb gradiens, kevesebb külső effekt */
+    background-image: linear-gradient(135deg, var(--wall-gradient-start), var(--wall-gradient-end));
+    
+    box-shadow: 
+        inset 2px 2px 5px rgba(255, 255, 255, 0.5), /* Csak egy kis belső élfény */
+        inset -2px -2px 8px rgba(255, 105, 180, 0.3); /* Enyhe belső mélység */
+    
+    /* SZÖGLETESEBB FORMÁLÁS: 12px-ről 6px-re, hogy jobban illeszkedjenek egymáshoz */
+    border-radius: 6px; 
+    
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Opcionális: egy vékony belső "törésvonal" effekt, hogy még kristályosabb legyen */
+.candy-square.wall::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.2) 50%, transparent 55%);
+    pointer-events: none;
+}
+
+/* Apró darabokra törés animáció */
+.candy-square.wall-crumble {
+    box-sizing: border-box;
+    background-clip: padding-box;
+    /* Megkapja a kristály kinézetét, hogy onnan folytassa, ahol a fal abbahagyta */
+    background-image: linear-gradient(135deg, var(--wall-gradient-start), var(--wall-gradient-end));
+    border-radius: 6px;
+    
+    animation: crumbleWall 0.6s ease-out forwards !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    
+    position: relative;
+    z-index: 5; /* Hogy a helyén maradjon, amíg a többi cukorka esik */
+}
+
+@keyframes crumbleWall {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+        clip-path: inset(0% 0% 0% 0%); /* Teljes, ép négyzet */
+    }
+    20% {
+        transform: scale(1.1) rotate(3deg);
+        /* Egyenetlen repedések jelennek meg a széleken */
+        clip-path: polygon(10% 0%, 90% 0%, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0% 90%, 0% 10%);
+    }
+    50% {
+        opacity: 1;
+        /* A fő tömb szilánkosra törik */
+        clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%, 50% 50%);
+        /* Árnyékokkal imitálunk 3-4 különálló szálló szilánkot */
+        box-shadow: 
+            -25px -20px 0 -2px var(--wall-gradient-start),
+            20px -25px 0 -3px var(--wall-gradient-end),
+            15px 25px 0 -2px var(--wall-gradient-start),
+            -20px 20px 0 -4px var(--wall-gradient-end);
+        transform: scale(1) translateY(10px) rotate(-5deg);
+    }
+    100% {
+        opacity: 0;
+        /* A darabok szétrepülnek és lehullanak */
+        transform: scale(1.2) translateY(80px) rotate(20deg);
+        clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%); /* A központi rész eltűnik */
+        box-shadow: 
+            -60px -40px 0 -5px var(--wall-gradient-start),
+            50px -60px 0 -5px var(--wall-gradient-end),
+            40px 60px 0 -5px var(--wall-gradient-start),
+            -50px 50px 0 -5px var(--wall-gradient-end);
+    }
+}
+
+/* --- LIGHTBOX (Nagyított kép a Galériában) --- */
+#lightbox {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #000000E6; /* 90%-os fekete háttér */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000; /* Mindenek felett jelenjen meg */
+}
+
+#lightbox-img {
+    max-width: 90%;
+    max-height: 90%;
+    border: 5px solid var(--theme-light-pink);
+    border-radius: 10px;
+    box-shadow: 0 0 30px #FF69B480; /* Halvány rózsaszín ragyogás (50%) */
+    object-fit: contain;
+}
+
+#lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 40px;
+    color: #FFFFFF;
+    font-size: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+#lightbox-close:hover {
+    color: var(--theme-pink);
+}
+
+
+/* Keverés értesítő */
+.shuffle-toast {
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 105, 180, 0.95);
+    color: white;
+    padding: 15px 40px;
+    border-radius: 30px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    z-index: 4000;
+    box-shadow: 0 10px 20px rgba(255, 20, 147, 0.4);
+    pointer-events: none;
+    animation: fadeInOut 1.5s ease-in-out forwards;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translate(-50%, -20%); }
+    20% { opacity: 1; transform: translate(-50%, -50%); }
+    80% { opacity: 1; transform: translate(-50%, -50%); }
+    100% { opacity: 0; transform: translate(-50%, -80%); }
+}
+
+
+/* --- KILÉPÉS MEGERŐSÍTÉSE --- */
+.confirm-box {
+    background: white;
+    padding: 20px; /* Kevesebb belső hely, több tartalomnak */
+    border-radius: 25px;
+    text-align: center;
+    width: 85%; /* Kicsit beljebb húzva */
+    max-width: 280px; /* 320-ról 280-ra vettük, így a legkisebb telefonon is elfér */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border: 4px solid #ff69b4; /* Itt beírtam direktben a színt, ha a változó nem élne */
+    box-sizing: border-box; /* Életmentő: a padding és keret nem növeli a szélességet */
+}
+
+.confirm-box h2 {
+    color: #d63031;
+    font-size: 1.4rem; /* Kicsit kisebb betű, hogy ne törjön több sorba */
+    margin-bottom: 8px;
+}
+
+.confirm-box p {
+    color: #666;
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+    line-height: 1.3;
+}
+
+.confirm-buttons {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+}
+
+.confirm-buttons .win-action-btn {
+    flex: 1;
+    height: 50px; /* Kicsit alacsonyabb gombok */
+    font-size: 1rem;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.heart-penalty-text {
+    color: #d63031; /* Szép piros szín */
+    font-size: 1.8rem;
+    font-weight: 900;
+    margin: 15px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    animation: pulseHeart 1s infinite alternate; /* Opcionális: finom lüktetés */
+}
+
+@keyframes pulseHeart {
+    from { transform: scale(1); }
+    to { transform: scale(1.1); }
+}
+
+/* --- GAME OVER SCREEN (Vesztés képernyő) --- */
+#game-over-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100dvh;
+    background-color: rgba(0, 0, 0, 0.7); /* Sötétítő réteg, hogy a pálya háttrébe kerüljön */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2500;
+}
+
+/* Hogy a Game Over gombjai beférjenek a dobozba, felülírjuk a méretüket */
+#game-over-screen .win-action-btn {
+    width: 100%;
+    height: 60px;
+    font-size: 2rem;
+    border-radius: 15px;
+}
+
+/* --- JÁTÉKTÉR TAKARÍTÁSA (ANIMÁCIÓ) --- */
+.fade-out-candy {
+    animation: popOut 0.4s forwards cubic-bezier(0.55, 0.085, 0.68, 0.53);
+    pointer-events: none; /* Ne lehessen rákattintani eltűnés közben */
+}
+
+@keyframes popOut {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.9; }
+    100% { transform: scale(0); opacity: 0; }
+}

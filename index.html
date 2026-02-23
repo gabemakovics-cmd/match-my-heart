@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Match My Heart</title>
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff1493">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+      }
+    </script>
+    </head>
+
+<body>
+
+<div id="loading-screen" class="screen">
+    <div class="loader-content" id="loader-brand-content">
+        <h1 class="brand-title">Match<br>My Heart</h1>
+        <div class="brand-heart">❤️</div>
+        <div class="loading-bar-container">
+            <div class="loading-bar-fill" id="brand-loading-bar-fill"></div>
+        </div>
+        <p class="loading-text">Indítás...</p>
+    </div>
+
+    <div class="loader-content hidden" id="loader-tips-content">
+        <div class="tip-container">
+            <div class="tip-icon" id="loading-tip-icon">🚀</div>
+            <h2 id="loading-tip-title">Rakéta</h2>
+            <p id="loading-tip-text">Húzz össze 4 cukorkát egy sorban vagy oszlopban a létrehozásához!</p>
+        </div>
+        <div class="loading-bar-container">
+            <div class="loading-bar-fill" id="loading-bar-fill"></div>
+        </div>
+        <p class="loading-text">Betöltés...</p>
+    </div>
+
+    <div class="loader-content hidden" id="loader-splash-content">
+        <h1 class="splash-level-title" id="splash-level-number">1. Szint</h1>
+        <div class="splash-goals-container" id="splash-goals"></div>
+        <div class="splash-moves-container">
+            <span class="splash-moves-icon">⇆</span>
+            <span class="splash-moves-text" id="splash-moves-count">0</span>
+        </div>
+        <div class="splash-loading-text">Készülj...</div>
+    </div>
+</div>
+
+<div id="start-screen" class="screen hidden">
+    <div class="start-content">
+        <h1 class="main-title">Match<br>My Heart</h1>
+        <button id="btn-enter-game" class="win-action-btn primary-btn start-btn">▶</button>
+    </div>
+</div>
+
+<div id="main-menu" class="screen">
+    <div class="menu-header-container">
+        <div class="menu-top-bar">
+            <div class="stat-box heart-box">
+                <span class="stat-icon">❤️</span>
+                <span id="menu-hearts-count">5</span>
+                <span id="menu-hearts-timer" class="hidden">09:59</span>
+            </div>
+            
+            <div class="stat-box star-box">
+                <span class="stat-icon">⭐</span>
+                <span id="menu-star-currency">0</span>
+            </div>
+        </div>
+        <h1 class="menu-title">Match My Heart</h1>
+    </div>
+
+    <div class="level-buttons"></div>
+
+    <div id="level-info-panel" class="hidden">
+        <div class="highscore-badge-container">
+            <div id="menu-highscore-badge" class="highscore-badge hidden">🏆 0</div>
+        </div>
+        <div id="info-goals" class="goal-preview"></div>
+    </div>
+
+    <div class="bottom-nav-bar">
+        <button id="btn-open-shop" class="nav-btn shop-btn">🛒</button>
+        <button id="btn-play" class="play-btn">▶</button>
+        <button id="btn-gallery" class="nav-btn gallery-btn">🖼️</button>
+    </div>
+</div>
+
+<div id="shop-overlay" class="screen hidden overlay">
+    <div class="shop-container">
+        <div class="shop-header">
+            <h2>Varázs Bolt</h2>
+            <button id="btn-close-shop" class="close-btn">✖</button>
+        </div>
+
+        <div class="shop-tabs">
+            <button class="shop-tab active" data-tab="lives">Szívek</button>
+            <button class="shop-tab" data-tab="boosters">Segítségek</button>
+        </div>
+
+        <div class="shop-balance-display">
+            Egyenleg: <span id="shop-stars-value">0</span> ⭐
+        </div>
+
+        <div id="shop-tab-lives" class="shop-content-group">
+            <div class="shop-items-grid">
+                <div class="shop-item">
+                    <div class="item-icon">❤️</div>
+                    <div class="item-details">
+                        <h3>+1 Szív</h3>
+                        <p>Azonnali töltés</p>
+                    </div>
+                    <button id="btn-buy-heart" class="buy-btn" onclick="buyItem('heart')">5 ⭐</button>
+                </div>
+                <div class="shop-item">
+                    <div class="item-icon">💖</div>
+                    <div class="item-details">
+                        <h3>Tele Szív</h3>
+                        <p>Maxra töltés</p>
+                    </div>
+                    <button id="btn-buy-refill" class="buy-btn" onclick="buyItem('refill')">20 ⭐</button>
+                </div>
+                <div class="shop-item premium-item">
+                    <div class="item-icon">💞</div>
+                    <div class="item-details">
+                        <h3>Limit: 8</h3>
+                        <p>1 óráig tart</p>
+                    </div>
+                    <button id="btn-buy-limit" class="buy-btn gold-btn" onclick="buyItem('limit')">50 ⭐</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="shop-tab-boosters" class="shop-content-group hidden">
+            <div class="shop-items-grid">
+                <div class="shop-item">
+                    <div class="item-icon">🔨</div>
+                    <div class="item-details">
+                        <h3>Kalapács</h3>
+                        <p>Készlet: <span id="count-hammer">0</span> db</p>
+                    </div>
+                    <button id="btn-buy-hammer" class="buy-btn" onclick="buyItem('hammer')">15 ⭐</button>
+                </div>
+
+                <div class="shop-item">
+                    <div class="item-icon">🌬️</div>
+                    <div class="item-details">
+                        <h3>Szélvihar</h3>
+                        <p>Készlet: <span id="count-rowClear">0</span> db</p>
+                    </div>
+                    <button id="btn-buy-rowClear" class="buy-btn" onclick="buyItem('rowClear')">25 ⭐</button>
+                </div>
+
+                <div class="shop-item">
+                    <div class="item-icon">☄️</div>
+                    <div class="item-details">
+                        <h3>Meteor</h3>
+                        <p>Készlet: <span id="count-colClear">0</span> db</p>
+                    </div>
+                    <button id="btn-buy-colClear" class="buy-btn" onclick="buyItem('colClear')">25 ⭐</button>
+                </div>
+
+                <div class="shop-item">
+                    <div class="item-icon">🔃</div>
+                    <div class="item-details">
+                        <h3>Ingyen Csere</h3>
+                        <p>Készlet: <span id="count-freeSwap">0</span> db</p>
+                    </div>
+                    <button id="btn-buy-freeSwap" class="buy-btn" onclick="buyItem('freeSwap')">20 ⭐</button>
+                </div>
+
+                <div class="shop-item">
+                    <div class="item-icon">🔀</div>
+                    <div class="item-details">
+                        <h3>Keverés</h3>
+                        <p>Készlet: <span id="count-shuffle">0</span> db</p>
+                    </div>
+                    <button id="btn-buy-shuffle" class="buy-btn" onclick="buyItem('shuffle')">10 ⭐</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <div id="gallery-screen" class="screen hidden">
+        <h1>Emlékeink</h1>
+        <div id="gallery-container" class="gallery-grid">
+            </div>
+        <button id="btn-back-from-gallery" class="gallery-btn">☰</button>
+    </div>
+
+    <div id="lightbox" class="hidden">
+        <span id="lightbox-close">&times;</span>
+        <img id="lightbox-img" src="" alt="Nagyított kép">
+    </div>
+
+
+<div id="game-screen" class="screen hidden">
+    <div class="game-container">
+        
+        <div id="game-top-bar">
+            <button id="btn-back-menu" class="game-top-btn">☰</button>
+            
+            <div class="score-star-container">
+		<div class="score-text" id="score-text">0</div>
+                <div class="score-progress-bg">
+                    <div class="score-progress-fill" id="score-fill"></div>
+                    <div class="star-marker" id="star-marker-1">★</div>
+                    <div class="star-marker" id="star-marker-2">★</div>
+                    <div class="star-marker" id="star-marker-3">★</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid"></div>
+<div id="effects-layer"></div>
+
+<div class="booster-bar">
+    <div class="booster-item" id="b-hammer" onclick="useBooster('hammer')">
+        <div class="booster-icon">🔨</div>
+        <div class="booster-count" id="b-count-hammer">0</div>
+    </div>
+    <div class="booster-item" id="b-rowClear" onclick="useBooster('rowClear')">
+        <div class="booster-icon">🌬️</div>
+        <div class="booster-count" id="b-count-rowClear">0</div>
+    </div>
+    <div class="booster-item" id="b-colClear" onclick="useBooster('colClear')">
+        <div class="booster-icon">☄️</div>
+        <div class="booster-count" id="b-count-colClear">0</div>
+    </div>
+    <div class="booster-item" id="b-freeSwap" onclick="useBooster('freeSwap')">
+        <div class="booster-icon">🔃</div>
+        <div class="booster-count" id="b-count-freeSwap">0</div>
+    </div>
+    <div class="booster-item" id="b-shuffle" onclick="useBooster('shuffle')">
+        <div class="booster-icon">🌀</div>
+        <div class="booster-count" id="b-count-shuffle">0</div>
+    </div>
+</div>
+        
+        <div class="game-dashboard">
+            <div class="moves-box">
+                <span class="moves-icon">⇆</span>
+                <span id="moves" class="moves-value">-</span>
+            </div>
+            
+            <div class="goals-box" id="goal-container"></div>
+            
+            <span id="score" class="hidden">0</span> 
+        </div>
+    </div>
+</div>
+
+    <div id="confirm-screen" class="screen hidden overlay">
+        <div class="confirm-box">
+            <h2>Biztosan kilépsz?</h2>
+            <p>A jelenlegi haladásod elvész ezen a pályán.</p>
+	    <p class="heart-penalty-text">-1 <span class="stat-icon">❤️</span></p>
+            <div class="confirm-buttons">
+                <button id="btn-confirm-yes" class="win-action-btn secondary-btn">Igen</button>
+                <button id="btn-confirm-no" class="win-action-btn primary-btn">Nem</button>
+            </div>
+        </div>
+    </div>
+
+<div id="success-overlay" class="screen hidden overlay">
+    <h1 class="success-text">Hurrá!</h1>
+</div>
+
+<div id="skip-overlay" class="hidden"></div>
+
+<div id="win-screen" class="hidden">
+    
+    <div class="win-modal">
+        <h2 id="win-message">Győzelem!</h2>
+
+        <div class="win-image-container">
+            <img id="win-image" src="" alt="Megnyert pálya képe">
+        </div>
+
+        <div class="win-stats-container">
+            <div class="win-stars">
+                <div class="win-star-wrapper" id="win-star-wrap-1">
+                    <span class="win-star-bg">⭐</span>
+                    <span class="win-star-fill" id="win-star-fill-1">⭐</span>
+                </div>
+                <div class="win-star-wrapper" id="win-star-wrap-2">
+                    <span class="win-star-bg">⭐</span>
+                    <span class="win-star-fill" id="win-star-fill-2">⭐</span>
+                </div>
+                <div class="win-star-wrapper" id="win-star-wrap-3">
+                    <span class="win-star-bg">⭐</span>
+                    <span class="win-star-fill" id="win-star-fill-3">⭐</span>
+                </div>
+            </div>
+            <div class="win-score-text" id="win-score-display">0</div>
+        </div>
+
+        <div class="win-buttons">
+            <button id="btn-back-from-win" class="win-action-btn secondary-btn">🏠</button>
+            <button id="btn-restart-from-win" class="win-action-btn secondary-btn">🔄</button>
+            <button id="next-level-btn" class="win-action-btn primary-btn hidden">▶</button>
+        </div>
+    </div>
+
+</div>
+
+<div id="game-over-screen" class="screen hidden">
+    <div class="confirm-box">
+        <h2>Sajnos nem sikerült!</h2>
+        <p>Elfogyott a lépésed. Megpróbálod újra?</p>
+        <div class="confirm-buttons">
+            <button id="btn-gameover-menu" class="win-action-btn secondary-btn">☰</button>
+            <button id="btn-gameover-restart" class="win-action-btn primary-btn" style="animation: none;">⟳</button>
+        </div>
+    </div>
+</div>
+
+    <script src="globals.js" defer></script>
+    <script src="saveandload.js" defer></script>
+    <script src="ui.js" defer></script>
+    <script src="powerups.js" defer></script>
+    <script src="boosters.js" defer></script>
+    <script src="level-initialize.js" defer></script>
+    <script src="game-engine.js" defer></script>
+    <script src="input.js" defer></script>
+    <script src="debug.js" defer></script>
+    <script src="level-end.js" defer></script>
+</body>
+</html>
